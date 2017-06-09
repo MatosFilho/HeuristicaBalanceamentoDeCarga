@@ -6,7 +6,8 @@ import java.util.Random;
 public class Computador {
 	
 	private static final int AMOUNT = 10;
-	private static final int TMT = 1000000000;
+	private static final int TMT = 100000000;
+	private static final int N = 4;
 	
 	private static int numProcessos;
 	private static int numProcessadores;
@@ -14,6 +15,8 @@ public class Computador {
 	private static int numMensagens;
 	static ArrayList<Processador> multiprocessador;
 	static Random gerador = new Random ();
+	
+	/* Função que busca processador ocioso. */
 	
 	public static void vasculha (int indice) {
 		for (int k = 0; k < numProcessadores; k++){
@@ -25,49 +28,60 @@ public class Computador {
 		}
 	}
 	
-	public static void gerador () {
+	/* Gerador de processos. A cada TMT clocks gera AMOUNT processos. */
+	
+	public static void geradorDeProcessos (int tempoDeClock) {
 		int tempo = 0;
 		int numCPU;
 		for (int n = 0; n < AMOUNT; n++){
 			tempo = (gerador.nextInt(20)+1)*1000000;
 			numCPU =  (gerador.nextInt(numProcessadores)+1);
-			Processo aux = new Processo(numCPU, 2017, tempo);
+			Processo aux = new Processo(numCPU, tempoDeClock, tempo);
 			multiprocessador.get(numCPU-1).addProcesso(aux);
 			System.out.println("Processo para a CPU " + numCPU + " de tempo " + tempo);
 			numProcessos++;
 		}
 	}
 	
+	/* Adiciona N processadores para compor o multiprocessador */
+	
+	public static void montaMultiprocessador (int numProc) {
+		for (int n = 1; n <= numProc; n++) {
+			Processador processador = new Processador (n);
+			multiprocessador.add(processador);
+		}
+	}
+	
 	public static void main (String[] args) {
 		multiprocessador = new ArrayList<Processador> (); 
 		
-		Processador intel1 = new Processador (1);
-		Processador intel2 = new Processador (2);
-		Processador intel3 = new Processador (3);
-		Processador intel4 = new Processador (4);
-		
-		multiprocessador.add(intel1);
-		multiprocessador.add(intel2);
-		multiprocessador.add(intel3);
-		multiprocessador.add(intel4);
+		montaMultiprocessador (N);
 		
 		numProcessos = 0;
 		numProcessadores = multiprocessador.size();
 		numMensagens = 0;
 		
-		gerador ();
-		gerador ();
-		gerador ();
+		int gerarProcessos = TMT;
 		
-		while (numProcessos > 0)
+		for (int cont = 0; cont < 1000000000; cont++) {
+			
+			if (gerarProcessos == TMT) {
+				System.out.println("Valor do contador :" + cont);
+				geradorDeProcessos (cont);
+				gerarProcessos = 0;
+			}
+			
+			gerarProcessos++;
+			
 			for (int k = 0; k < numProcessadores; k++) 
 				if (multiprocessador.get(k).getNumProcessos() > 0) 
-					if (multiprocessador.get(k).processar() == 1) {
+					if (multiprocessador.get(k).processar() == false) {
 						numProcessos -= 1;
 						mediaProcessos = (int) Math.ceil(numProcessos/numProcessadores);
 						if (multiprocessador.get(k).getNumProcessos() > mediaProcessos)
 							vasculha (k);
 					}
+		}
 		
 		System.out.println("Numero de mensagens trocadas: " + numMensagens);
 		
