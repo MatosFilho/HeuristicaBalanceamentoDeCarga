@@ -13,32 +13,39 @@ public class Processador {
 		numProcessos = 0;
 	}
 	
+	/* Função que adiciona processos a lista de processos do processador */
+	
 	public void addProcesso (Processo p) {
 		filaProcessos.add(p);
 		numProcessos++;
 	}
 	
-	public int getNumProcessos () {
-		return this.numProcessos;
-	}
+	public int getNumProcessos () {return this.numProcessos;}
 	
-	public int processar () {
+	/* Enquanto o primeiro processo da fila de processos tem tempo de CPU restando
+	   ele é processado. Quando ele é finalizado, é removido da lista de processos 
+	   e é sinalizado o seu término retornando false. */
+	
+	public boolean processar () {
 		if (filaProcessos.get(0).getTempo() > 0) {
 			filaProcessos.get(0).processa();
-			return 0;
+			return true;
 		}
 		else {
 			System.out.println("Processo do processador " + filaProcessos.get(0).getNumeroCPU() + 
 					" processado pelo processador " + ID);
 			filaProcessos.remove(0);
 			numProcessos--;
-			return 1;
+			return false;
 		}
 	}
 
+	/* Função para trnaferência de processos. Retira um processo da fila de 
+	   processos e retorna o processo a ser transferido */
+	
 	public Processo transfereProcesso() {
-		Processo procTransferido = filaProcessos.get(numProcessos-1);
-		filaProcessos.remove(numProcessos - 1);
+		Processo procTransferido = filaProcessos.get(0);
+		filaProcessos.remove(0);
 		numProcessos--;
 		return procTransferido;
 	}
